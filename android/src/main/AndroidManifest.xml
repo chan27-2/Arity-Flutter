@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.chan272.arity_widget">
+  <application
+    android:theme="@style/ArityStyle">
+  </application>
+</manifest>
