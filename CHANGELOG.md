@@ -1,3 +1,7 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+**Arity Flutter Plugin v1.0.0 (2024-07-03)**
+
+**Features:**
+
+- Leverages a native Android view for equation viewing.

@@ -1,3 +1,4 @@
+import 'package:arity_widget/arity_layout.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -32,12 +33,7 @@ class ArityView extends StatelessWidget {
     const Text fallback = Text('MyAndroidView is not available on this platform');
 
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return AndroidView(
-        key: ValueKey(params),
-        viewType: 'arity_widget_view',
-        creationParams: params.toMap(),
-        creationParamsCodec: const StandardMessageCodec(),
-      );
+      return Calculator3DPage(params: params);
     }
 
     return fallback;
