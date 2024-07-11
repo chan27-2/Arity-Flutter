@@ -27,7 +27,7 @@ class _Calculator3DPageState extends State<Calculator3DPage> {
   @override
   void initState() {
     super.initState();
-    equationController.text = equation;
+    equationController.text = widget.params.equation;
     finalParams = ArityParams(equation: equation);
     equationFocusNode.addListener(() {
       if (equationFocusNode.hasFocus) {
@@ -47,82 +47,61 @@ class _Calculator3DPageState extends State<Calculator3DPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.params.showOnlyGraph) {
+      return AndroidView(
+        key: ValueKey(finalParams),
+        viewType: 'arity_widget_view',
+        creationParams: widget.params.toMap(),
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+    }
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: OrientationBuilder(builder: (context, orientation) {
-        if (orientation == Orientation.landscape) {
-          return Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Stack(
+      body: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Stack(
+              children: [
+                Column(
                   children: [
-                    Column(
-                      children: [
-                        EquationSection(
-                          equation: equation,
-                          equationController: equationController,
-                          focusNode: equationFocusNode,
-                        ),
-                        Expanded(
-                          child: HistorySection(
-                            history: equationHistory,
-                            onHistoryItemSelected: selectHistoryItem,
-                          ),
-                        ),
-                      ],
+                    EquationSection(
+                      equation: equation,
+                      equationController: equationController,
+                      focusNode: equationFocusNode,
                     ),
-                    if (showKeyboard)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: ScientificKeyboard(onPressed: _onKeyPressed),
-                      ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  child: AndroidView(
-                    key: ValueKey(finalParams),
-                    viewType: 'arity_widget_view',
-                    creationParams: finalParams.toMap(),
-                    creationParamsCodec: const StandardMessageCodec(),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-        return Column(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Math.tex(finalParams.equation, textStyle: TextStyle(fontSize: 24)),
-                    SizedBox(height: 16),
                     Expanded(
-                      child: AndroidView(
-                        key: ValueKey(finalParams),
-                        viewType: 'arity_widget_view',
-                        creationParams: widget.params.toMap(),
-                        creationParamsCodec: const StandardMessageCodec(),
+                      child: HistorySection(
+                        history: equationHistory,
+                        onHistoryItemSelected: selectHistoryItem,
                       ),
                     ),
                   ],
                 ),
+                if (showKeyboard)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: ScientificKeyboard(onPressed: _onKeyPressed),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: AndroidView(
+                key: ValueKey(finalParams),
+                viewType: 'arity_widget_view',
+                creationParams: finalParams.toMap(),
+                creationParamsCodec: const StandardMessageCodec(),
               ),
             ),
-            if (showKeyboard) ScientificKeyboard(onPressed: _onKeyPressed),
-          ],
-        );
-      }),
+          ),
+        ],
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () {

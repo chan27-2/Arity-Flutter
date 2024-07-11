@@ -13,8 +13,9 @@ class ArityPlugin {
 
 class ArityParams {
   final String equation;
+  final bool showOnlyGraph;
 
-  const ArityParams({required this.equation});
+  const ArityParams({required this.equation, this.showOnlyGraph = false});
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
