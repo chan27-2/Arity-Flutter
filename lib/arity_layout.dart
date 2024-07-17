@@ -15,7 +15,7 @@ class Calculator3DPage extends StatefulWidget {
 }
 
 class _Calculator3DPageState extends State<Calculator3DPage> {
-  String equation = '4×sin(x^2+y^2)÷(1+x^2+y^2)×cos(x×y)';
+  late String equation;
   String result = '';
   bool showKeyboard = false;
 
@@ -27,6 +27,7 @@ class _Calculator3DPageState extends State<Calculator3DPage> {
   @override
   void initState() {
     super.initState();
+    equation = widget.params.equation;
     equationController.text = widget.params.equation;
     finalParams = ArityParams(equation: widget.params.equation);
     equationFocusNode.addListener(() {
@@ -66,7 +67,7 @@ class _Calculator3DPageState extends State<Calculator3DPage> {
                 Column(
                   children: [
                     EquationSection(
-                      equation: equation,
+                      equation: widget.params.equation,
                       equationController: equationController,
                       focusNode: equationFocusNode,
                     ),
@@ -155,6 +156,7 @@ class _Calculator3DPageState extends State<Calculator3DPage> {
   void selectHistoryItem(String historyEquation) {
     setState(() {
       equation = historyEquation;
+      finalParams = ArityParams(equation: equation);
       equationController.text = historyEquation;
     });
     updateEquation();

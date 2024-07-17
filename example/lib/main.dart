@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
             ),
             Expanded(
               child: ArityView(
-                params: ArityParams(equation: _controller.text),
+                params: ArityParams(equation: _controller.text, showOnlyGraph: true),
               ),
             ),
           ],
