@@ -18,7 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _arityWidgetPlugin = ArityPlugin();
-  final equation = r'\ln \left( x\right)';
+  final equation = r'x^{2} + y^{2}';
   final _controller = TextEditingController();
 
   @override
@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
             ),
             Expanded(
               child: ArityView(
-                params: ArityParams(equation: _controller.text, showOnlyGraph: true),
+                params: ArityParams(equation: _controller.text, showOnlyGraph: false),
               ),
             ),
           ],

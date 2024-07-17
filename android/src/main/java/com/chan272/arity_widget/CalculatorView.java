@@ -1,17 +1,13 @@
 package com.chan272.arity_widget;
 
 import android.content.Context;
-import android.content.Intent;
-import android.text.Layout;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.widget.LinearLayout;
 
 import org.javia.arity.Function;
 import org.javia.arity.Symbols;
@@ -19,20 +15,19 @@ import org.javia.arity.Symbols;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class CalculatorView extends LinearLayout implements View.OnClickListener {
-    static Symbols symbols = new Symbols();
+public class CalculatorView extends LinearLayout {
+    private static final Symbols symbols = new Symbols();
     private GraphView graphView;
     private Graph3dView graph3dView;
-    static ArrayList<Function> graphedFunction;
-    private final ArrayList<Function> auxFuncs = new ArrayList<>();
-    static boolean useSmoothShading3D;
-    static int resolution3D;
+    static ArrayList<Function> graphedFunction = new ArrayList<>();
+    static boolean useSmoothShading3D = true;
+    static final int resolution3D = 72;
 
     private Map<String, Object> creationParams;
 
     public CalculatorView(@NonNull Context context, Object params) {
         super(context);
-        creationParams = (Map<String, Object>) params;
+        this.creationParams = (Map<String, Object>) params;
         init(context);
     }
 
@@ -41,159 +36,118 @@ public class CalculatorView extends LinearLayout implements View.OnClickListener
         init(context);
     }
 
-    public CalculatorView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
-    }
-
     private void init(Context context) {
         setOrientation(LinearLayout.VERTICAL);
         setSaveEnabled(true);
         setFocusableInTouchMode(true);
 
-        // Create GraphView
+        initGraphView(context);
+        initGraph3dView(context);
+
+        evaluate();
+    }
+
+    private void initGraphView(Context context) {
         graphView = new GraphView(context);
-        LinearLayout.LayoutParams graphParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1f);
+        LayoutParams graphParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f);
         graphView.setLayoutParams(graphParams);
         graphView.setVisibility(View.GONE);
-        graphView.setId(View.generateViewId());
         addView(graphView);
+    }
 
-        // Create Graph3dView
+    private void initGraph3dView(Context context) {
         graph3dView = new Graph3dView(context);
-        LinearLayout.LayoutParams graph3dParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1f);
-        int margin = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                16,
+        LayoutParams graph3dParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f);
+        int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,
                 context.getResources().getDisplayMetrics());
         graph3dParams.setMargins(margin, margin, margin, margin);
         graph3dView.setLayoutParams(graph3dParams);
         graph3dView.setVisibility(View.GONE);
-        graph3dView.setId(View.generateViewId());
         addView(graph3dView);
-
-        graphView.setOnClickListener(this);
-        graph3dView.setOnClickListener(this);
-
-        useSmoothShading3D = true;
-        resolution3D = Integer.parseInt("72");
-        evaluate();
     }
 
-    @Override
-    public void onClick(View target) {
-        // if (target == graphView) {
-        // Intent intent = new Intent(getContext(), ShowGraph.class);
-        // intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // getContext().startActivity(intent);
-        // }
-    }
-
-    void evaluate() {
-        String[] init = {
-                "4\u00d7sin(x^2+y^2)\u00f7(1+x^2+y^2)\u00d7cos(x\u00d7y)",
-                "sqrt(pi)\u00f70.5!",
-                "e^(i\u00d7pi)",
-                "ln(e^100)",
-                "sin(x)",
-                "x^2"
-        };
-        log(creationParams + "creationParams");
-
-        if (creationParams != null) {
-            String expression = (String) creationParams.get("equation");
-            if (expression != null) {
-                init[0] = expression;
-            }
+    private void evaluate() {
+        String equation = "4×sin(x^2+y^2)÷(1+x^2+y^2)×cos(x×y)";
+        if (creationParams != null && creationParams.containsKey("equation")) {
+            equation = (String) creationParams.get("equation");
         }
-        evaluate(init[0]);
+        evaluateExpression(equation);
     }
 
-    private void evaluate(String text) {
-        if (text.isEmpty()) {
+    private void evaluateExpression(String expression) {
+        if (expression.isEmpty())
             return;
-        }
 
-        String unicodeEquationConverted = LatexToUnicodeConverter.latexToUnicode(text);
-        System.out.println("unicodeEquationConverted: " + unicodeEquationConverted);
+        expression = LatexToUnicodeConverter.latexToUnicode(expression);
+        graphedFunction
+                .clear();
 
-        text = unicodeEquationConverted;
-
-        auxFuncs.clear();
-        int end = -1;
-        do {
-            text = text.substring(end + 1);
-            end = text.indexOf(';');
-            String slice = end == -1 ? text : text.substring(0, end);
+        for (String slice : expression.split(";")) {
             try {
                 Function f = symbols.compile(slice);
-                auxFuncs.add(f);
+                graphedFunction
+                        .add(f);
             } catch (Exception e) {
-                CalculatorView.log("error: " + e);
-                continue;
+                log("Error: " + e);
             }
-        } while (end != -1);
+        }
 
-        graphedFunction = auxFuncs;
-        int size = auxFuncs.size();
-        if (size == 0) {
+        updateGraph();
+    }
+
+    private void updateGraph() {
+        if (graphedFunction
+                .isEmpty())
             return;
-        } else if (size == 1) {
-            Function f = auxFuncs.get(0);
-            int arity = f.arity();
-            if (arity == 1 || arity == 2) {
-                showGraph(f);
-            } else if (arity == 0) {
-                showGraph(null);
-            } else {
-                showGraph(null);
-            }
+
+        if (graphedFunction
+                .size() == 1) {
+            showSingleFunctionGraph(graphedFunction
+                    .get(0));
         } else {
-            graphView.setFunctions(auxFuncs);
-            if (graphView.getVisibility() != View.VISIBLE) {
-                graph3dView.setVisibility(View.GONE);
-                graph3dView.onPause();
-                graphView.setVisibility(View.VISIBLE);
-            }
+            showMultipleFunctionsGraph();
         }
     }
 
-    private void showGraph(Function f) {
-        CalculatorView.log("showGraph: " + f);
-        if (f == null) {
-            if (graphView.getVisibility() != View.VISIBLE) {
-                graphView.setVisibility(View.GONE);
-                graph3dView.setVisibility(View.GONE);
-            }
+    private void showSingleFunctionGraph(Function function) {
+        if (function == null) {
+            hideAllGraphs();
+        } else if (function.arity() == 1) {
+            showGraph2D(function);
+        } else if (function.arity() == 2) {
+            showGraph3D(function);
         } else {
-            // graphedFunction = f;
-            if (f.arity() == 1) {
-                graphView.setFunction(f);
-                if (graphView.getVisibility() != View.VISIBLE) {
-                    CalculatorView.log("setting graphView visible");
-                    graph3dView.setVisibility(View.GONE);
-                    graph3dView.onPause();
-                    graphView.setVisibility(View.VISIBLE);
-                }
-            } else {
-                graph3dView.setFunction(f);
-                if (graph3dView.getVisibility() != View.VISIBLE) {
-                    graphView.setVisibility(View.GONE);
-                    graph3dView.setVisibility(View.VISIBLE);
-                    graph3dView.onResume();
-                }
-            }
+            hideAllGraphs();
         }
     }
 
-    // log
-    static void log(String mes) {
-        Log.d("Calculator", mes);
+    private void showMultipleFunctionsGraph() {
+        graphView.setFunctions(graphedFunction);
+        showGraph2D(null);
+    }
+
+    private void showGraph2D(Function function) {
+        if (function != null) {
+            graphView.setFunction(function);
+        }
+        graph3dView.setVisibility(View.GONE);
+        graph3dView.onPause();
+        graphView.setVisibility(View.VISIBLE);
+    }
+
+    private void showGraph3D(Function function) {
+        graph3dView.setFunction(function);
+        graphView.setVisibility(View.GONE);
+        graph3dView.setVisibility(View.VISIBLE);
+        graph3dView.onResume();
+    }
+
+    private void hideAllGraphs() {
+        graphView.setVisibility(View.GONE);
+        graph3dView.setVisibility(View.GONE);
+    }
+
+    static void log(String message) {
+        android.util.Log.d("Calculator", message);
     }
 }
