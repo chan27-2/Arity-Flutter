@@ -120,6 +120,11 @@ public class CalculatorView extends LinearLayout implements View.OnClickListener
             return;
         }
 
+        String unicodeEquationConverted = LatexToUnicodeConverter.latexToUnicode(text);
+        System.out.println("unicodeEquationConverted: " + unicodeEquationConverted);
+
+        text = unicodeEquationConverted;
+
         auxFuncs.clear();
         int end = -1;
         do {

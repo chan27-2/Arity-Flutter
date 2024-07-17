@@ -28,7 +28,7 @@ class _Calculator3DPageState extends State<Calculator3DPage> {
   void initState() {
     super.initState();
     equationController.text = widget.params.equation;
-    finalParams = ArityParams(equation: equation);
+    finalParams = ArityParams(equation: widget.params.equation);
     equationFocusNode.addListener(() {
       if (equationFocusNode.hasFocus) {
         setState(() {

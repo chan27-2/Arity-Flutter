@@ -1,6 +1,5 @@
 import 'package:arity_widget/arity_layout.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'arity_widget_platform_interface.dart';

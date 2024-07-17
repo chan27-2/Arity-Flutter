@@ -18,11 +18,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _arityWidgetPlugin = ArityPlugin();
-  final _controller = TextEditingController(text: "x+1");
+  final equation = r'\ln \left( x\right)';
+  final _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _controller.text = equation;
     initPlatformState();
   }
 
