@@ -18,7 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _arityWidgetPlugin = ArityPlugin();
-  final equation = r'x^{2} + y^{2}';
+  final equation = r'y-\dfrac{1}{x}';
   final _controller = TextEditingController();
 
   @override

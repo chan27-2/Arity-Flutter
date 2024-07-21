@@ -78,7 +78,8 @@ public class CalculatorView extends LinearLayout {
         if (expression.isEmpty())
             return;
 
-        expression = LatexToUnicodeConverter.latexToUnicode(expression);
+        expression = LatexToUnicodeConverter.convert(expression);
+        System.out.println("Converted: " + expression);
         graphedFunction
                 .clear();
 
