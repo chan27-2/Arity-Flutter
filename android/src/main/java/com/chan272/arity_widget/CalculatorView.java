@@ -71,6 +71,8 @@ public class CalculatorView extends LinearLayout {
         if (creationParams != null && creationParams.containsKey("equation")) {
             equation = (String) creationParams.get("equation");
         }
+        //  move all to the left side of the equation and remove the equal sign
+        equation = equation.replace("=", "-(") + ")";
         evaluateExpression(equation);
     }
 
@@ -90,6 +92,7 @@ public class CalculatorView extends LinearLayout {
                         .add(f);
             } catch (Exception e) {
                 log("Error: " + e);
+                System.out.println("Error: " + e);
             }
         }
 
